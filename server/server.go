@@ -1,34 +1,27 @@
-package tutorial
+package main
 
 import (
-	context "context"
+	tService "grpctutorial/server/services"
 	"grpctutorial/proto-gen/tutorial"
-	"math/rand"
+	"log"
+	"net"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 )
 
-// We define a server struct that implements the server interface.
-type Server struct {
-	tutorial.UnimplementedTutorialServer
-}
+func main() {
+	println("gRPC server tutorial in Go")
 
-// We implement the SayHello method of the server interface.
-func (s *Server) SayHello(ctx context.Context, in *tutorial.HelloRequest) (*tutorial.HelloReply, error) {
-	return &tutorial.HelloReply{
-		Message: "Hello, " + in.GetName()}, nil
-}
-func (s *Server) RollDice(ctx context.Context, req *tutorial.RollDiceRequest) (*tutorial.RollDiceResponse, error) {
-	var res tutorial.RollDiceResponse
-
-	if req.Num < 0{
-		return nil, grpc.Errorf(codes.InvalidArgument, "number should be positive")
-	}
-	
-	for i := 0; i < int(req.Num); i++ {
-		res.Dice = append(res.Dice, int32(rand.Intn(100)))
+	listener, err := net.Listen("tcp", ":9000")
+	if err != nil {
+		panic(err)
 	}
 
-	return &res, nil
+	s := grpc.NewServer()
+	tutorial.RegisterTutorialServer(s, &tService.TutorialService{})
+	reflection.Register(s)
+	if err := s.Serve(listener); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
