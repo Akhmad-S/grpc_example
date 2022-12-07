@@ -1,7 +1,7 @@
 package main
 
 import (
-	tService "grpctutorial/server/services"
+	tServer "grpctutorial/server/services"
 	"grpctutorial/proto-gen/tutorial"
 	"log"
 	"net"
@@ -19,7 +19,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	tutorial.RegisterTutorialServer(s, &tService.TutorialService{})
+	tutorial.RegisterTutorialServer(s, &tServer.TutorialService{})
 	reflection.Register(s)
 	if err := s.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
